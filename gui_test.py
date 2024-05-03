@@ -54,7 +54,7 @@ root.title("TileSet Generator")
 
 # Create a Frame for the buttons
 button_frame = Frame(root)
-button_frame.pack(side=LEFT, padx=10)
+button_frame.grid(row=0, column=0, padx=10, sticky="ns")
 
 interior_color_button = Button(button_frame, text="Wall Interior\nColor", command=change_interior_color)
 interior_color_button.pack(pady=5)
@@ -74,7 +74,7 @@ redo_button.pack(pady=10)
 
 # Create the canvas frame for the grid
 canvas_frame = Frame(root, width=256, height=256)
-canvas_frame.pack()
+canvas_frame.grid(row=0, column=1, sticky="nsew")
 
 frames = [[None] * 16 for _ in range(16)]
 for i in range(16):
@@ -87,6 +87,11 @@ for i in range(16):
     frames[1][i].configure(bg=wall_interior_color)
     frames[2][i].configure(bg=wall_interior_color)
 
+preview_frame = Frame(root, width=256, height=256)
+preview_frame.grid(row=0, column=2, padx=10, sticky="ns")
+
 root.bind("<ButtonPress-1>", mouse_pressed)
+placeholder_label = Label(preview_frame, text="Placeholder")
+placeholder_label.pack()
 
 root.mainloop()
