@@ -66,9 +66,9 @@ def make_preview():
     tileset = generate_tileset(tile, wall_interior_color, path)
     photo = PhotoImage(file=path)
     photo = photo.zoom(3)
-    label = Label(preview_frame, text="Preview", image=photo)
-    label.image = photo
-    label.pack()
+    preview_image_label.configure(image=photo)
+    preview_image_label.image = photo
+    preview_image_label.pack()
 
 root = Tk()
 root.title("TileSet Generator")
@@ -117,6 +117,8 @@ preview_frame.grid(row=0, column=2, padx=10, sticky="ns")
 
 placeholder_label = Label(preview_frame, text="Preview")
 placeholder_label.pack()
+
+preview_image_label = Label(preview_frame, text="Image")
 
 root.bind("<ButtonPress-1>", mouse_pressed)
 
