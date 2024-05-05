@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import colorchooser
-from tkinter import filedialog
-from PIL import Image, ImageTk
+from tkinter import messagebox
+from PIL import Image
 from tileset_generator import generate_tileset
 
 wall_interior_color = "#808080"
@@ -11,29 +11,51 @@ image_name = "tileset.png"
 undo_stack = []
 redo_stack = []
 
+draw_mode = False
+
 class PixelChange:
     def __init__(self, pos: tuple, previous_color):
         self.pos = pos
         self.previous_color = previous_color
         self.new_color = selected_color
 
-def mouse_pressed(event):
-    if event.widget.master == canvas_frame:
-        frame = event.widget
-        info = frame.grid_info()
-        row = info['row']
-        column = info['column']
+def left_click(event):
+    if event.widget.master != canvas_frame:
+        return
+    frame = event.widget
+    color_pixel(frame)
 
-        change = PixelChange((row,column),frames[row][column]["background"])
-        undo_stack.append(change)
+    print("holding click: ", draw_mode)
 
-        if row < 3:
-            return
-        frame.configure(bg=selected_color)
-        if row == 3:
-            frames[0][column].configure(bg=frames[3][column]["background"])
-        for i in range(16):
-            frames[0][i].configure(bg=frames[3][i]["background"])
+def toggle_draw_mode(event):
+    global draw_mode
+    draw_mode = not draw_mode
+    print("holding click: ", draw_mode)
+
+def pixel_hovered(event):
+    global draw_mode
+    if not draw_mode:
+        return
+    if event.widget.master != canvas_frame:
+        return
+    frame = event.widget
+    color_pixel(frame)
+
+def color_pixel(frame):
+    info = frame.grid_info()
+    row = info['row']
+    column = info['column']
+
+    change = PixelChange((row, column), frames[row][column]["background"])
+    undo_stack.append(change)
+
+    if row < 3:
+        return
+    frame.configure(bg=selected_color)
+    if row == 3:
+        frames[0][column].configure(bg=frames[3][column]["background"])
+    for i in range(16):
+        frames[0][i].configure(bg=frames[3][i]["background"])
 
 def change_color():
     global selected_color
@@ -100,17 +122,21 @@ def make_preview():
         return
 
     tile = make_tile()
-    tileset = generate_tileset(tile, wall_interior_color, image_name)
+    wall_interior_rgb = tuple(int(wall_interior_color.lstrip('#')[i:i + 2], 16) for i in (0, 2, 4))
+    tileset = generate_tileset(tile, wall_interior_rgb, image_name)
     photo = PhotoImage(file=image_name)
     photo = photo.zoom(3)
     preview_image_label.configure(image=photo)
     preview_image_label.image = photo
     preview_image_label.pack()
 
-def choose_destination():
-    global directory
-    filename = filedialog.askdirectory()
-    directory = filename
+def make_info_panel():
+    info = ("Left Mouse to change color of pixel"
+            "\nRight or Middle Mouse to toggle Draw Mode"
+            "\n\"Generate\" to save and display preview"
+            "\nWall interior is enforced to be single color"
+            "\nTop row is enforced to match row opposite of the wall interior")
+    messagebox.showinfo("Info", info)
 
 root = Tk()
 root.title("TileSet Generator")
@@ -138,8 +164,10 @@ redo_button.pack(pady=2)
 generate_button = Button(button_frame, text="Generate", command=make_preview)
 generate_button.pack(pady=2)
 
-#path_button = Button(button_frame, text="Choose File", command=make_preview)
-#path_button.pack(pady=2)
+info_image = PhotoImage(file="info_FILL0_wght400_GRAD0_opsz24.png")
+path_button = Button(button_frame, text="Choose File", image=info_image, command=make_info_panel)
+path_button.image = info_image
+path_button.pack(pady=2)
 
 # Create the canvas frame for the grid
 canvas_frame = Frame(root, width=256, height=256)
@@ -151,6 +179,8 @@ for i in range(16):
         frame = Frame(canvas_frame, width=16, height=16, borderwidth=0.5, relief="solid")
         frame.grid(row=i, column=j)
         frame.configure(background="#FFFFFF")
+        frame.bind("<Enter>", pixel_hovered)
+        # frame.bind("")
         frames[i][j] = frame
 
 for i in range(16):
@@ -165,6 +195,8 @@ placeholder_label.pack()
 
 preview_image_label = Label(preview_frame, text="Image")
 
-root.bind("<ButtonPress-1>", mouse_pressed)
+root.bind("<ButtonPress-1>", left_click)
+root.bind("<ButtonPress-2>", toggle_draw_mode)
+root.bind("<ButtonPress-3>", toggle_draw_mode)
 
 root.mainloop()
