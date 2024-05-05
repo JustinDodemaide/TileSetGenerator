@@ -6,6 +6,14 @@ from tileset_generator import generate_tileset
 wall_interior_color = "#808080"
 selected_color = "#000000"
 grid_on = True
+undo_stack = []
+redo_stack = []
+
+class PixelChange:
+    def __init__(self, pos: tuple, previous_color):
+        self.pos = pos
+        self.previous_color = previous_color
+        self.new_color = selected_color
 
 def mouse_pressed(event):
     if event.widget.master == canvas_frame:
@@ -13,6 +21,10 @@ def mouse_pressed(event):
         info = frame.grid_info()
         row = info['row']
         column = info['column']
+
+        change = PixelChange((row,column),frames[row][column]["background"])
+        undo_stack.append(change)
+
         if row < 3:
             return
         frame.configure(bg=selected_color)
@@ -43,10 +55,30 @@ def toggle_grid():
             frames[i][j]["relief"] = relief
 
 def undo():
-    pass
+    if not undo_stack:
+        return
+    change = undo_stack.pop()
+    redo_stack.append(change)
+
+    row = change.pos[0]
+    col = change.pos[1]
+    frame = frames[row][col]
+    frame.configure(bg=change.previous_color)
+    if row == 3:
+        frames[0][col].configure(bg=frames[3][col]["background"])
 
 def redo():
-    pass
+    if not redo_stack:
+        return
+    change = redo_stack.pop()
+    undo_stack.append(change)
+
+    row = change.pos[0]
+    col = change.pos[1]
+    frame = frames[row][col]
+    frame.configure(bg=change.new_color)
+    if row == 3:
+        frames[0][col].configure(bg=frames[3][col]["background"])
 
 def make_tile():
     tile = Image.new(mode="RGB", size=(16, 16))
