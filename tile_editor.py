@@ -1,11 +1,13 @@
 from tkinter import *
 from tkinter import colorchooser
+from tkinter import filedialog
 from PIL import Image, ImageTk
 from tileset_generator import generate_tileset
 
 wall_interior_color = "#808080"
 selected_color = "#000000"
 grid_on = True
+image_name = "tileset.png"
 undo_stack = []
 redo_stack = []
 
@@ -93,14 +95,22 @@ def make_tile():
     return tile
 
 def make_preview():
-    path = "tileset.png"
+    global image_name
+    if image_name is None:
+        return
+
     tile = make_tile()
-    tileset = generate_tileset(tile, wall_interior_color, path)
-    photo = PhotoImage(file=path)
+    tileset = generate_tileset(tile, wall_interior_color, image_name)
+    photo = PhotoImage(file=image_name)
     photo = photo.zoom(3)
     preview_image_label.configure(image=photo)
     preview_image_label.image = photo
     preview_image_label.pack()
+
+def choose_destination():
+    global directory
+    filename = filedialog.askdirectory()
+    directory = filename
 
 root = Tk()
 root.title("TileSet Generator")
@@ -110,23 +120,26 @@ button_frame = Frame(root)
 button_frame.grid(row=0, column=0, padx=10, sticky="ns")
 
 interior_color_button = Button(button_frame, text="Wall Interior\nColor", command=change_interior_color)
-interior_color_button.pack(pady=5)
+interior_color_button.pack(pady=2)
 
 color_button = Button(button_frame, text="Color Select", command=change_color)
-color_button.pack(pady=5)
+color_button.pack(pady=2)
 
 # Add example buttons to the button frame
 toggle_grid = Button(button_frame, text="Toggle Grid", command=toggle_grid)
-toggle_grid.pack(pady=10)
+toggle_grid.pack(pady=2)
 
 undo_button = Button(button_frame, text="Undo", command=undo)
-undo_button.pack()
+undo_button.pack(pady=2)
 
 redo_button = Button(button_frame, text="Redo", command=redo)
-redo_button.pack(pady=10)
+redo_button.pack(pady=2)
 
 generate_button = Button(button_frame, text="Generate", command=make_preview)
-generate_button.pack(pady=10)
+generate_button.pack(pady=2)
+
+#path_button = Button(button_frame, text="Choose File", command=make_preview)
+#path_button.pack(pady=2)
 
 # Create the canvas frame for the grid
 canvas_frame = Frame(root, width=256, height=256)
