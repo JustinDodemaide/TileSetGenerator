@@ -78,7 +78,7 @@ FRONT_END_LEFT = {
 
 }
 
-def make_side_tile():
+def make_side_tile(front_pixels):
     # Decided that making the side tile a special case was a
     # better alternative to a >32 line dictionary
     tile = Image.new(mode="RGB", size=(16, 16))
@@ -96,7 +96,7 @@ def make_side_tile():
         front_y += 1
     return tile
 
-def make_tile(instructions: dict):
+def make_tile(instructions: dict, front_pixels, side_pixels):
     tile = Image.new(mode="RGB", size=(16, 16))
     pixels = tile.load()
     for area in instructions:
@@ -117,7 +117,6 @@ def copy_area(copy_from, copy_to, area: Area):
     while(y <= area.bottom_right[Y]):
         x = area.top_left[X]
         while(x <= area.bottom_right[X]):
-            # print("applying ", copy_from[x, y], " to (", x, ", ", y, ")")
             copy_to[x, y] = copy_from[x, y]
             x += 1
         y += 1
@@ -129,33 +128,35 @@ def apply_color_to_area(to, area, color):
     while(y <= area.bottom_right[Y]):
         x = area.top_left[X]
         while(x <= area.bottom_right[X]):
-            # print("applying ", color, " to (", x, ", ", y, ")")
             to[x, y] = color
             x += 1
         y += 1
 
-front = Image.open("C:\\Users\\jmdod\\Desktop\\front.png")
-front_pixels = front.convert("RGB").load()
+def generate_tileset(front_tile:Image, wall_interior_color, path="tileset.png"):
+    WALL_INTERIOR = wall_interior_color
+    #front = Image.open("C:\\Users\\jmdod\\Desktop\\front.png")
+    front_pixels = front_tile.convert("RGB").load()
+    side = make_side_tile(front_pixels)
+    side_pixels = side.convert("RGB").load()
 
-side = make_side_tile()
-side_pixels = side.convert("RGB").load()
+    map_image = Image.new(mode="RGB", size=(80, 80))
+    map_image.paste(make_tile(NW_CORNER,front_pixels,side_pixels),(0, 0))
+    map_image.paste(make_tile(FRONT_TO_SIDE_BOTTOM,front_pixels,side_pixels),(48, 0))
+    map_image.paste(make_tile(NE_CORNER,front_pixels,side_pixels),(64, 0))
+    map_image.paste(make_tile(SIDE_END_BOTTOM,front_pixels,side_pixels),(0, 16))
+    map_image.paste(side,(64, 16))
+    #map_image.paste(make_tile(SIDE_END_TOP),(0, 32))
+    #make_tile(SIDE_END_TOP).show()
+    map_image.paste(make_tile(SIDE_TO_FRONT_RIGHT,front_pixels,side_pixels),(0, 48))
+    map_image.paste(make_tile(FRONT_TO_SIDE_TOP,front_pixels,side_pixels),(16, 48))
+    map_image.paste(make_tile(SIDE_TO_FRONT_LEFT,front_pixels,side_pixels),(64, 48))
+    map_image.paste(make_tile(SW_CORNER,front_pixels,side_pixels),(0, 64))
+    map_image.paste(front_tile,(16, 64))
+    map_image.paste(make_tile(FRONT_END_RIGHT,front_pixels,side_pixels),(32, 64))
+    map_image.paste(make_tile(FRONT_END_LEFT,front_pixels,side_pixels),(48, 64))
+    map_image.paste(make_tile(SE_CORNER,front_pixels,side_pixels),(64, 64))
 
-map_image = Image.new(mode="RGB", size=(80, 80))
-map_image.paste(make_tile(NW_CORNER),(0, 0))
-map_image.paste(make_tile(FRONT_TO_SIDE_BOTTOM),(48, 0))
-map_image.paste(make_tile(NE_CORNER),(64, 0))
-map_image.paste(make_tile(SIDE_END_BOTTOM),(0, 16))
-map_image.paste(side,(64, 16))
-#map_image.paste(make_tile(SIDE_END_TOP),(0, 32))
-#make_tile(SIDE_END_TOP).show()
-map_image.paste(make_tile(SIDE_TO_FRONT_RIGHT),(0, 48))
-map_image.paste(make_tile(FRONT_TO_SIDE_TOP),(16, 48))
-map_image.paste(make_tile(SIDE_TO_FRONT_LEFT),(64, 48))
-map_image.paste(make_tile(SW_CORNER),(0, 64))
-map_image.paste(front,(16, 64))
-map_image.paste(make_tile(FRONT_END_RIGHT),(32, 64))
-map_image.paste(make_tile(FRONT_END_LEFT),(48, 64))
-map_image.paste(make_tile(SE_CORNER),(64, 64))
-
-map_image.show()
-map_image.save("test.png")
+    map_image.save(path)
+    return map_image
+    # map_image.show()
+    # map_image.save("test.png")

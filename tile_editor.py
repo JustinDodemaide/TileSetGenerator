@@ -1,8 +1,10 @@
 from tkinter import *
 from tkinter import colorchooser
+from PIL import Image, ImageTk
+from tileset_generator import generate_tileset
 
-wall_interior_color = "grey"
-selected_color = "black"
+wall_interior_color = "#808080"
+selected_color = "#000000"
 grid_on = True
 
 def mouse_pressed(event):
@@ -18,9 +20,6 @@ def mouse_pressed(event):
             frames[0][column].configure(bg=frames[3][column]["background"])
         for i in range(16):
             frames[0][i].configure(bg=frames[3][i]["background"])
-
-def button_pressed():
-    print("Button Pressed!")
 
 def change_color():
     global selected_color
@@ -38,7 +37,7 @@ def toggle_grid():
     relief = "solid"
     if grid_on:
         relief = "flat"
-    grid_on = not grid_on # Toggle
+    grid_on = not grid_on  # Toggle
     for i in range(16):
         for j in range(16):
             frames[i][j]["relief"] = relief
@@ -48,6 +47,28 @@ def undo():
 
 def redo():
     pass
+
+def make_tile():
+    tile = Image.new(mode="RGB", size=(16, 16))
+    pixels = tile.load()
+    for i in range(16):
+        for j in range(16):
+            hex = frames[i][j]["background"].lstrip('#')
+            # Convert the hex to RGB
+            # https://stackoverflow.com/questions/29643352/converting-hex-to-rgb-value-in-python
+            rgb = tuple(int(hex[i:i + 2], 16) for i in (0, 2, 4))
+            pixels[j, i] = rgb
+    return tile
+
+def make_preview():
+    path = "tileset.png"
+    tile = make_tile()
+    tileset = generate_tileset(tile, wall_interior_color, path)
+    photo = PhotoImage(file=path)
+    photo = photo.zoom(3)
+    label = Label(preview_frame, text="Preview", image=photo)
+    label.image = photo
+    label.pack()
 
 root = Tk()
 root.title("TileSet Generator")
@@ -72,6 +93,9 @@ undo_button.pack()
 redo_button = Button(button_frame, text="Redo", command=redo)
 redo_button.pack(pady=10)
 
+generate_button = Button(button_frame, text="Generate", command=make_preview)
+generate_button.pack(pady=10)
+
 # Create the canvas frame for the grid
 canvas_frame = Frame(root, width=256, height=256)
 canvas_frame.grid(row=0, column=1, sticky="nsew")
@@ -81,6 +105,7 @@ for i in range(16):
     for j in range(16):
         frame = Frame(canvas_frame, width=16, height=16, borderwidth=0.5, relief="solid")
         frame.grid(row=i, column=j)
+        frame.configure(background="#FFFFFF")
         frames[i][j] = frame
 
 for i in range(16):
@@ -90,8 +115,9 @@ for i in range(16):
 preview_frame = Frame(root, width=256, height=256)
 preview_frame.grid(row=0, column=2, padx=10, sticky="ns")
 
-root.bind("<ButtonPress-1>", mouse_pressed)
-placeholder_label = Label(preview_frame, text="Placeholder")
+placeholder_label = Label(preview_frame, text="Preview")
 placeholder_label.pack()
+
+root.bind("<ButtonPress-1>", mouse_pressed)
 
 root.mainloop()
