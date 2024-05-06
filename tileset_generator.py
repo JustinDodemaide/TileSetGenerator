@@ -106,13 +106,12 @@ def make_tile(instructions: dict, info):
     pixels = tile.load()
     for area in instructions:
         command = instructions[area]
-        match command:
-            case Commands.COPY_FRONT:
-                copy_area(front_pixels, pixels, area)
-            case Commands.COPY_SIDE:
-                copy_area(side_pixels,pixels,area)
-            case Commands.WALL_INTERIOR_COLOR:
-                apply_color_to_area(pixels, area, wall_interior)
+        if command == Commands.COPY_FRONT:
+            copy_area(front_pixels, pixels, area)
+        if command == Commands.COPY_SIDE:
+            copy_area(side_pixels,pixels,area)
+        if command == Commands.WALL_INTERIOR_COLOR:
+            apply_color_to_area(pixels, area, wall_interior)
     return tile
 
 def copy_area(copy_from, copy_to, area: Area):

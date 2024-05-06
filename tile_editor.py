@@ -25,12 +25,9 @@ def left_click(event):
     frame = event.widget
     color_pixel(frame)
 
-    print("holding click: ", draw_mode)
-
 def toggle_draw_mode(event):
     global draw_mode
     draw_mode = not draw_mode
-    print("holding click: ", draw_mode)
 
 def pixel_hovered(event):
     global draw_mode
@@ -164,9 +161,9 @@ redo_button.pack(pady=2)
 generate_button = Button(button_frame, text="Generate", command=make_preview)
 generate_button.pack(pady=2)
 
-info_image = PhotoImage(file="info_FILL0_wght400_GRAD0_opsz24.png")
-path_button = Button(button_frame, text="Choose File", image=info_image, command=make_info_panel)
-path_button.image = info_image
+# info_image = PhotoImage(file="info_FILL0_wght400_GRAD0_opsz24.png")
+path_button = Button(button_frame, text="Info", command=make_info_panel)
+# path_button.image = info_image
 path_button.pack(pady=2)
 
 # Create the canvas frame for the grid
