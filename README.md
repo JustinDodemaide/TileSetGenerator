@@ -14,7 +14,7 @@ Running the executable opens the tile editor, where you can design the tile from
 
 - Right or Middle Mouse toggles draw mode, changing the color of all hovered-over pixels without the need to left click.
 
-- You may notice the first 3 rows cannot be edited. This is ensure visual continuity of between tiles of different orientations. The 1st row is automatically updated to match the 4th row. The 2nd and 3rd rows represent the interior of the wall, the color of which can be changed by pressing **Wall Interior Color**.
+- You may notice the first 3 rows cannot be edited. This is to ensure visual continuity between tiles of different orientations. The 1st row is automatically updated to match the 4th row. The 2nd and 3rd rows represent the interior of the wall, the color of which can be changed by pressing **Wall Interior Color**.
 
 - **Toggle Grid** removes or adds the black outlines surrounding each pixel.
 
